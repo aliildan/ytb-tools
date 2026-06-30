@@ -85,6 +85,14 @@ When a new version ships, refresh the marketplace catalog and update:
 
 ---
 
+## Research a whole topic at once
+
+Installed in Claude Code, the **`yt-research`** skill chains everything together. Just ask in plain language:
+
+> *"Research the top 30 YouTube videos on 'rust async' and give me a digest."*
+
+It searches, pulls each transcript, summarizes each (defaulting to quick/Haiku to keep big batches cheap), and produces a **combined digest** — recurring themes, a ranked "start here" shortlist, and any videos it had to skip. For large runs it **confirms with you first** and processes in batches with progress updates.
+
 ## Your library
 
 Everything is saved automatically (default `~/ytb-tools/`):

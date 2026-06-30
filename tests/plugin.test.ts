@@ -25,4 +25,9 @@ describe("plugin packaging", () => {
     expect(m.name).toBe("ytb-tools");
     expect(m.plugins.map((p: { name: string }) => p.name)).toContain("ytb-tools");
   });
+  it("ships the yt-research skill with a name in frontmatter", async () => {
+    const skill = await fs.readFile("skills/yt-research/SKILL.md", "utf8");
+    expect(skill).toMatch(/^---/);
+    expect(skill).toContain("name: yt-research");
+  });
 });

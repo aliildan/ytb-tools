@@ -3,7 +3,7 @@ import { searchVideos } from "../youtube/search.js";
 
 export const searchInput = {
   query: z.string().min(1).describe("Search query"),
-  limit: z.number().int().min(1).max(50).default(10).describe("Maximum results"),
+  limit: z.number().int().min(1).max(200).default(10).describe("Maximum results (paginated)"),
   type: z.enum(["video", "channel", "playlist"]).default("video").describe("Result type"),
 };
 

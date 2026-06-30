@@ -14,4 +14,16 @@ describe("searchVideos (live)", () => {
     },
     30_000,
   );
+
+  live(
+    "paginates past a single page for large limits",
+    async () => {
+      const results = await searchVideos("javascript tutorial", { limit: 40 });
+      // A single search page is ~20 items; >20 proves continuation paging works.
+      expect(results.length).toBeGreaterThan(20);
+      const ids = new Set(results.map((r) => r.videoId));
+      expect(ids.size).toBe(results.length); // no duplicates across pages
+    },
+    60_000,
+  );
 });

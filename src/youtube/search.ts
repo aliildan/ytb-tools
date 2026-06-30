@@ -52,15 +52,38 @@ export function normalizeSearchResults(raw: RawVideo[], limit: number): SearchRe
   return out;
 }
 
+interface SearchPage {
+  results?: RawVideo[];
+  videos?: RawVideo[];
+  has_continuation?: boolean;
+  getContinuation?: () => Promise<SearchPage>;
+}
+
 export async function searchVideos(
   query: string,
   opts: { limit?: number; type?: "video" | "channel" | "playlist" } = {},
 ): Promise<SearchResult[]> {
+  const limit = opts.limit ?? 10;
   const yt = await getInnertube();
-  const res = (await yt.search(query, { type: opts.type ?? "video" })) as unknown as {
-    results?: RawVideo[];
-    videos?: RawVideo[];
-  };
-  const raw = res.results ?? res.videos ?? [];
-  return normalizeSearchResults(raw, opts.limit ?? 10);
+  let page = (await yt.search(query, { type: opts.type ?? "video" })) as unknown as SearchPage;
+
+  const out: SearchResult[] = [];
+  const seen = new Set<string>();
+  // Page through continuations until we have `limit` results or run out.
+  for (let guard = 0; page && guard < 30; guard++) {
+    const items = page.results ?? page.videos ?? [];
+    for (const r of normalizeSearchResults(items, items.length)) {
+      if (seen.has(r.videoId)) continue;
+      seen.add(r.videoId);
+      out.push(r);
+      if (out.length >= limit) return out;
+    }
+    if (!page.has_continuation || typeof page.getContinuation !== "function") break;
+    try {
+      page = await page.getContinuation();
+    } catch {
+      break;
+    }
+  }
+  return out.slice(0, limit);
 }
