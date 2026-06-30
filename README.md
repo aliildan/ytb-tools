@@ -1,20 +1,30 @@
-# ytb-tools
+# 🎬 ytb-tools
 
-A keyless [MCP](https://modelcontextprotocol.io) server for working with YouTube:
+[![npm version](https://img.shields.io/npm/v/ytb-tools.svg)](https://www.npmjs.com/package/ytb-tools)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- **`youtube_search`** — search and return ranked video results.
-- **`youtube_get_transcript`** — extract a video's transcript (with language selection), auto-saved to a local library.
-- **`youtube_save_summary`** — persist a host-generated summary as Markdown.
+**Search YouTube, pull transcripts, and get AI summaries — right inside Claude and any other MCP client.**
 
-It ships both as a **Claude Code plugin** (with `/yt-search`, `/yt-transcript`, `/yt-summary` slash commands) and as a **standalone MCP server** for any client (Claude Desktop, Cursor, Cline, …).
+ytb-tools is a [Model Context Protocol](https://modelcontextprotocol.io) server that turns YouTube into something your AI assistant can actually work with. Ask it to find videos, grab a transcript, or summarize a talk — it just works.
 
-No API keys are required. Search uses the keyless [`youtubei.js`](https://github.com/LuanRT/YouTube.js) library. Transcripts use [yt-dlp](https://github.com/yt-dlp/yt-dlp), which the server **auto-provisions** — it prefers a system `yt-dlp` (or `YT_DLP_PATH`) and otherwise downloads the official standalone binary into its cache on first use, running it with the Node that already runs the server (no Python or Deno needed).
+> ✨ **Zero setup.** No API keys. No Google account. No manual installs. ytb-tools provisions everything it needs on its own.
 
-> **Why yt-dlp for transcripts?** As of 2026, YouTube's PO-token / `exp=xpe` clampdown makes keyless transcript fetching infeasible (the `get_transcript` endpoint 400s and caption URLs return empty bodies, even with a generated PO token or a headless browser). yt-dlp is the only path that reliably extracts arbitrary transcripts, so the server automates its setup.
+---
 
-## Use as a standalone MCP server (Claude Desktop, Cursor, …)
+## What you can do
 
-Add to your client's MCP config:
+- 🔎 **Search YouTube** — "find me the top React 19 talks" → ranked results with titles, channels, durations, and views.
+- 📝 **Get transcripts** — full transcripts in the video's language (or any available caption track), saved to a tidy local library.
+- 🧠 **Summarize videos** — TL;DR, structured notes, or a deep dive — written by Claude, in the video's own language.
+- 💾 **Builds your library** — every transcript and summary is auto-saved as clean files you can browse, search, and keep.
+
+---
+
+## Quick start
+
+### Any MCP client (Claude Desktop, Cursor, Cline, …)
+
+Add this to your client's MCP config — that's the whole install:
 
 ```json
 {
@@ -27,49 +37,69 @@ Add to your client's MCP config:
 }
 ```
 
-Then ask in natural language ("search YouTube for…", "get the transcript of…", "summarize this video…") and the client calls the tools.
+Then just ask:
 
-## Use as a Claude Code plugin
+> *"Search YouTube for the best intro to Rust, then summarize the top result."*
 
-Install the plugin (it bundles the MCP server and the slash commands), then:
+### Claude Code
 
-- `/yt-search <query>` — list ranked results.
-- `/yt-transcript <url|id> [lang]` — fetch a transcript.
-- `/yt-summary <url|id> [quick|standard|detailed]` — summarize at a chosen depth. In Claude Code, the summary is written by a subagent on the model matched to the depth (quick → Haiku, standard → Sonnet, detailed → Opus), in the transcript's language.
+Install the plugin and you get three slash commands on top of the tools:
 
-## Tools
-
-| Tool | Input | Output |
-|---|---|---|
-| `youtube_search` | `query`, `limit` (default 10), `type` (`video`\|`channel`\|`playlist`) | ranked results with title, channel, duration, views, URL |
-| `youtube_get_transcript` | `video` (URL or ID), `lang?` (BCP-47), `fresh?` | `{ videoId, title, language, availableLanguages, segments, fullText }` |
-| `youtube_save_summary` | `videoId`, `summary`, `style`, `title`, `url`, `model`, `language` | `{ savedTo }` |
-
-## Library & cache
-
-Transcripts and summaries auto-save to a cross-platform library (default `~/ytb-tools/`, override `YT_OUTPUT_DIR`):
-
-- `transcripts/{videoId}.{lang}.json` + `.txt`
-- `summaries/{videoId}.{style}.md` (with YAML frontmatter)
-
-A transcript cache lives in the OS cache dir (override `YT_CACHE_DIR`); the auto-downloaded yt-dlp binary lives under `<cache>/bin/`.
-
-## Configuration (env)
-
-| Variable | Purpose |
+| Command | What it does |
 |---|---|
-| `YT_OUTPUT_DIR` | Library location (default `~/ytb-tools`) |
-| `YT_CACHE_DIR` | Cache location (default OS cache dir) |
-| `YT_DLP_PATH` | Path to an existing yt-dlp binary (skips auto-download) |
+| `/yt-search <query>` | List ranked search results |
+| `/yt-transcript <url\|id> [lang]` | Fetch a transcript |
+| `/yt-summary <url\|id> [quick\|standard\|detailed]` | Summarize at the depth you want |
 
-## Development
+`/yt-summary` automatically picks the right model for the job — **quick → Haiku**, **standard → Sonnet**, **detailed → Opus** — and writes the summary in the video's language.
 
-```bash
-npm install
-npm test        # unit tests; network-gated live tests run with YT_LIVE=1
-npm run build   # compile to dist/
+---
+
+## Your library
+
+Everything is saved automatically (default `~/ytb-tools/`):
+
 ```
+~/ytb-tools/
+├── transcripts/
+│   ├── dQw4w9WgXcQ.en.json      # timestamped segments
+│   └── dQw4w9WgXcQ.en.txt       # plain text
+└── summaries/
+    └── dQw4w9WgXcQ.standard.md  # Markdown with title, url, model, date
+```
+
+Want them somewhere else? Set `YT_OUTPUT_DIR`.
+
+---
+
+## The tools
+
+| Tool | Does |
+|---|---|
+| `youtube_search` | Search YouTube and return ranked video results |
+| `youtube_get_transcript` | Extract a transcript (with language selection), auto-saved |
+| `youtube_save_summary` | Save a generated summary to your library |
+
+---
+
+## Configuration
+
+All optional:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `YT_OUTPUT_DIR` | Where transcripts & summaries are saved | `~/ytb-tools` |
+| `YT_CACHE_DIR` | Cache location | OS cache dir |
+| `YT_DLP_PATH` | Use an existing yt-dlp instead of the bundled one | auto |
+
+---
+
+## How it works (the short version)
+
+Search runs entirely in-process via [`youtubei.js`](https://github.com/LuanRT/YouTube.js) — no key, no quotas. Transcripts are powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp), which ytb-tools **downloads and manages for you automatically** the first time you need it (it reuses the Node runtime that's already running — no Python, no Deno). Summaries are written by your assistant's own model, so there's no extra API bill.
+
+---
 
 ## License
 
-MIT
+MIT © aliildan

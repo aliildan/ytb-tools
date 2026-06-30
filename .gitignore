@@ -19,3 +19,6 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Internal dev docs (specs/plans) — kept local, not published
+docs/
