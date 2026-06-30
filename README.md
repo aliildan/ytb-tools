@@ -41,9 +41,18 @@ Then just ask:
 
 > *"Search YouTube for the best intro to Rust, then summarize the top result."*
 
-### Claude Code
+### Claude Code (plugin)
 
-Install the plugin and you get three slash commands on top of the tools:
+Install it as a plugin to get the slash commands. Run these inside Claude Code:
+
+```text
+/plugin marketplace add aliildan/ytb-tools
+/plugin install ytb-tools@ytb-tools
+```
+
+The first command registers this repo as a marketplace; the second installs the plugin (which pulls in the MCP server via `npx` and adds the slash commands). Prefer a menu? Just run `/plugin`.
+
+You then get three commands:
 
 | Command | What it does |
 |---|---|
@@ -52,6 +61,27 @@ Install the plugin and you get three slash commands on top of the tools:
 | `/yt-summary <url\|id> [quick\|standard\|detailed]` | Summarize at the depth you want |
 
 `/yt-summary` automatically picks the right model for the job — **quick → Haiku**, **standard → Sonnet**, **detailed → Opus** — and writes the summary in the video's language.
+
+#### Updating the plugin
+
+When a new version ships, refresh the marketplace catalog and update:
+
+```text
+/plugin marketplace update ytb-tools
+/plugin update ytb-tools
+```
+
+#### Uninstalling
+
+```text
+/plugin uninstall ytb-tools@ytb-tools
+```
+
+> **Scripting it?** The same actions work non-interactively from your shell:
+> ```bash
+> claude plugin marketplace add aliildan/ytb-tools
+> claude plugin install ytb-tools@ytb-tools
+> ```
 
 ---
 

@@ -10,14 +10,19 @@ describe("plugin packaging", () => {
     const m = await readJson(".claude-plugin/plugin.json");
     expect(m.name).toBe("ytb-tools");
   });
-  it(".mcp.json launches the built server", async () => {
+  it(".mcp.json launches the server via npx", async () => {
     const c = await readJson(".mcp.json");
-    expect(c.mcpServers["ytb-tools"].command).toBe("node");
-    expect(c.mcpServers["ytb-tools"].args[0]).toContain("dist/index.js");
+    expect(c.mcpServers["ytb-tools"].command).toBe("npx");
+    expect(c.mcpServers["ytb-tools"].args).toContain("ytb-tools");
   });
   it("ships the three slash commands", async () => {
     for (const f of ["yt-search.md", "yt-transcript.md", "yt-summary.md"]) {
       await expect(fs.access(`commands/${f}`)).resolves.toBeUndefined();
     }
+  });
+  it("exposes a marketplace manifest listing the plugin", async () => {
+    const m = await readJson(".claude-plugin/marketplace.json");
+    expect(m.name).toBe("ytb-tools");
+    expect(m.plugins.map((p: { name: string }) => p.name)).toContain("ytb-tools");
   });
 });
