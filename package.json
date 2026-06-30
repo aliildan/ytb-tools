@@ -1,15 +1,47 @@
 {
   "name": "ytb-tools",
   "version": "0.1.0",
+  "description": "Keyless MCP server for YouTube search, transcript extraction (auto-provisioned yt-dlp), and host-driven summarization.",
   "type": "module",
+  "license": "MIT",
+  "author": "aliildan",
+  "homepage": "https://github.com/aliildan/ytb-tools#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aliildan/ytb-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aliildan/ytb-tools/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "youtube",
+    "transcript",
+    "captions",
+    "summarize",
+    "claude",
+    "yt-dlp"
+  ],
   "bin": {
     "ytb-tools": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
