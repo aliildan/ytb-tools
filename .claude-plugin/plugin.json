@@ -1,0 +1,6 @@
+{
+  "name": "ytb-tools",
+  "version": "0.1.0",
+  "description": "YouTube search, transcript extraction, and host-driven summarization via a keyless MCP server.",
+  "author": { "name": "aliildan" }
+}
